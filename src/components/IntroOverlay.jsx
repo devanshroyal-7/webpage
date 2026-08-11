@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
+import BashTypewriter from './BashTypewriter';
 import './IntroOverlay.css';
 
 const TILE_WIDTH = 76;
 const TILE_HEIGHT = 48;
-const WELCOME_DURATION = 1500;
+const WELCOME_DURATION = 1600;
+const WELCOME_START_DELAY = 900;
 const DARK_GREEN_SHADES = ['#a2ce3c', '#769b2b', '#526f1d', '#30450f'];
+const WELCOME_MESSAGE = ['Welcome!'];
 
 const createFixedRandomOrder = (length) => {
     const order = Array.from({ length }, (_, index) => index);
@@ -140,7 +143,11 @@ const IntroOverlay = () => {
             onAnimationEnd={finishIntro}
             aria-hidden="true"
         >
-            <span className="intro-welcome">Welcome!</span>
+            <BashTypewriter
+                phrases={WELCOME_MESSAGE}
+                className="intro-welcome"
+                startDelay={WELCOME_START_DELAY}
+            />
             {grid.tiles.map((tile) => (
                 <span
                     className="intro-tile"

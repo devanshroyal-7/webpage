@@ -1,6 +1,7 @@
 import { ArrowUpRight, Github, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BashTypewriter from '../components/BashTypewriter';
+import GraphSearchAnsi from '../components/GraphSearchAnsi';
 import './Home.css';
 
 const HOME_ROLES = [
@@ -95,21 +96,10 @@ const Home = () => {
 
                 <div className="ansi-card">
                     <div className="ansi-title">
-                        <span>devansh@robot:~</span>
-                        <span>80×24</span>
+                        <span>devansh@sbpl:~</span>
+                        <span>a*</span>
                     </div>
-                    <pre aria-label="ASCII art profile terminal">{`$ whoami
-devansh.j
-
-> focus .... manipulation
-> mode ..... curious
-> status ... online
-
-       [::]
-   o====||====o---<
-  /
- O
-/_\\  READY_`}</pre>
+                    <GraphSearchAnsi />
                     <div className="ansi-footer">
                         <a
                             href="https://github.com/devanshroyal-7"

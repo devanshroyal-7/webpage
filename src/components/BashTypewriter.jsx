@@ -6,10 +6,17 @@ const DELETE_DELAY = 32;
 const HOLD_DELAY = 3000;
 const NEXT_LINE_DELAY = 180;
 
-const BashTypewriter = ({ phrases, cycle = false, className = '' }) => {
+const BashTypewriter = ({
+    phrases,
+    cycle = false,
+    className = '',
+    startDelay = 0,
+}) => {
     const [phraseIndex, setPhraseIndex] = useState(0);
     const [visibleText, setVisibleText] = useState('');
-    const [phase, setPhase] = useState('typing');
+    const [phase, setPhase] = useState(
+        () => (startDelay > 0 ? 'waiting' : 'typing'),
+    );
     const [reduceMotion] = useState(
         () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     );
@@ -25,7 +32,9 @@ const BashTypewriter = ({ phrases, cycle = false, className = '' }) => {
 
         let timer;
 
-        if (phase === 'typing') {
+        if (phase === 'waiting') {
+            timer = window.setTimeout(() => setPhase('typing'), startDelay);
+        } else if (phase === 'typing') {
             if (visibleText.length < currentPhrase.length) {
                 timer = window.setTimeout(() => {
                     setVisibleText(currentPhrase.slice(0, visibleText.length + 1));
@@ -49,7 +58,15 @@ const BashTypewriter = ({ phrases, cycle = false, className = '' }) => {
         }
 
         return () => window.clearTimeout(timer);
-    }, [currentPhrase, cycle, phase, phrases.length, reduceMotion, visibleText]);
+    }, [
+        currentPhrase,
+        cycle,
+        phase,
+        phrases.length,
+        reduceMotion,
+        startDelay,
+        visibleText,
+    ]);
 
     return (
         <p

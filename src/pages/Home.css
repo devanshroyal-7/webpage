@@ -240,12 +240,9 @@
     letter-spacing: 0.07em;
 }
 
-.ansi-card pre {
+.ansi-card pre,
+.ansi-card .graph-search-ansi {
     min-height: 270px;
-    padding: 1.2rem;
-    overflow: hidden;
-    font: 0.72rem/1.55 var(--font-mono);
-    text-shadow: 0 0 10px rgba(201, 255, 74, 0.28);
 }
 
 .ansi-footer {
