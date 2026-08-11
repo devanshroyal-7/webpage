@@ -1,0 +1,205 @@
+.github-container {
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.flex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.github-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 0.85rem;
+    color: var(--text-primary);
+    border-color: rgba(201, 255, 74, 0.28);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    transition: all 0.2s ease;
+}
+
+.github-profile-link:hover {
+    background: var(--accent-color);
+    color: #111512;
+}
+
+.repos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.repo-card {
+    position: relative;
+    min-height: 250px;
+    padding: 1.15rem;
+    display: flex;
+    flex-direction: column;
+    background:
+        linear-gradient(145deg, rgba(201, 255, 74, 0.025), transparent 40%),
+        rgba(255, 255, 255, 0.018);
+    animation: fadeIn 0.5s ease-out forwards;
+    opacity: 0;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.repo-card.featured {
+    grid-column: 1 / -1;
+    min-height: 280px;
+    background:
+        linear-gradient(110deg, rgba(201, 255, 74, 0.11), transparent 46%),
+        rgba(255, 255, 255, 0.018);
+    border-color: rgba(201, 255, 74, 0.32);
+}
+
+.repo-card.featured::after {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    content: "FEATURED";
+    color: var(--accent-color);
+    font-family: var(--font-mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.1em;
+}
+
+.repo-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(201, 255, 74, 0.4);
+    box-shadow: 7px 8px 0 rgba(201, 255, 74, 0.08);
+}
+
+.repo-header {
+    margin-bottom: 1rem;
+}
+
+.repo-index {
+    display: block;
+    margin-bottom: 2.5rem;
+    color: #657068;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+}
+
+.repo-name-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+}
+
+.repo-name-link h3 {
+    margin-bottom: 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+}
+
+.external-icon {
+    color: var(--text-secondary);
+    opacity: 0;
+    transform: translateX(-5px);
+    transition: all 0.2s ease;
+}
+
+.repo-name-link:hover .external-icon {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.repo-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+}
+
+.repo-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    padding-top: 0.8rem;
+    border-top: 1px solid rgba(226, 232, 240, 0.1);
+}
+
+.repo-lang {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.lang-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--text-secondary);
+}
+
+.repos-status {
+    color: var(--text-secondary);
+    padding: 2rem;
+    border: 1px dashed rgba(201, 255, 74, 0.25);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+}
+
+.lang-dot.typescript {
+    background-color: #3178c6;
+}
+
+.lang-dot.javascript {
+    background-color: #f7df1e;
+}
+
+.lang-dot.python {
+    background-color: #3572a5;
+}
+
+.lang-dot.matlab {
+    background-color: #e16737;
+}
+
+.lang-dot.rust {
+    background-color: #dea584;
+}
+
+.lang-dot.shell {
+    background-color: #89e051;
+}
+
+.repo-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.repo-stats span {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+@media (max-width: 600px) {
+    .flex-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    .github-profile-link {
+        margin-top: 1rem;
+    }
+
+    .repo-card.featured {
+        grid-column: auto;
+    }
+}

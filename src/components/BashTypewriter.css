@@ -1,0 +1,37 @@
+.bash-typewriter {
+    min-height: 1.65em;
+    font-family: var(--font-mono);
+}
+
+.bash-typewriter-visual {
+    display: inline;
+}
+
+.bash-prompt {
+    margin-right: 0.65em;
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.bash-cursor {
+    display: inline-block;
+    width: 0.52em;
+    height: 1.05em;
+    margin-left: 0.18em;
+    background: var(--accent-color);
+    box-shadow: 0 0 8px rgba(201, 255, 74, 0.35);
+    transform: translateY(0.16em);
+    animation: bash-cursor-blink 0.9s steps(1, end) infinite;
+}
+
+@keyframes bash-cursor-blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bash-cursor {
+        animation: none;
+    }
+}
