@@ -31,8 +31,16 @@ const Research = () => {
                         <h2>Current Focus</h2>
                     </div>
                     <p className="panel-body">
-                        Exploring robust robotic manipulation with 3D point cloud transformers,
-                        grasp prediction, and planners that can react under real-world constraints.
+                        Building{' '}
+                        <a
+                            href="https://github.com/devanshroyal-7/E-sim"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-link"
+                        >
+                            E-sim
+                        </a>
+                        , leveraging physics simulator experience for fast online planning.
                     </p>
                     <div className="status-badge"><span /> Active research</div>
                 </section>
