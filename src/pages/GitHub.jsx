@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Star, GitFork, Github as GitIcon, ExternalLink } from 'lucide-react';
 import BashTypewriter from '../components/BashTypewriter';
+import PageHeader from '../components/PageHeader';
 import './GitHub.css';
 
 const GITHUB_USER = 'devanshroyal-7';
@@ -62,29 +63,28 @@ const GitHub = () => {
 
     return (
         <div className="github-container">
-            <header className="page-header flex-header">
-                <div className="page-kicker">
-                    <span>03 / 04</span>
-                    <span>REPOSITORY.INDEX</span>
-                </div>
-                <div>
-                    <h1>Open Source<span className="logo-accent">.</span></h1>
-                    <BashTypewriter
-                        phrases={GITHUB_SUBTITLE}
-                        className="subtitle"
-                        onceKey="github-subtitle"
-                    />
-                </div>
-                <a
-                    href={`https://github.com/${GITHUB_USER}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="github-profile-link glass-panel"
-                >
-                    <GitIcon size={20} />
-                    <span>@{GITHUB_USER}</span>
-                </a>
-            </header>
+            <PageHeader
+                kickerIndex="03 / 04"
+                kickerLabel="REPOSITORY.INDEX"
+                title="Open Source"
+                actions={(
+                    <a
+                        href={`https://github.com/${GITHUB_USER}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="github-profile-link glass-panel"
+                    >
+                        <GitIcon size={20} />
+                        <span>@{GITHUB_USER}</span>
+                    </a>
+                )}
+            >
+                <BashTypewriter
+                    phrases={GITHUB_SUBTITLE}
+                    className="subtitle"
+                    onceKey="github-subtitle"
+                />
+            </PageHeader>
 
             {loading && <p className="repos-status">Loading repositories…</p>}
             {error && (

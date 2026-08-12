@@ -110,4 +110,150 @@
     .gs-cursor {
         animation: none;
     }
+
+    .gs-svg-halo.gs-current {
+        animation: none;
+    }
+
+    .gs-svg-node,
+    .gs-svg-edge,
+    .gs-svg-halo,
+    .graph-search-ansi.is-compact .gs-visual {
+        transition: none;
+    }
+}
+
+.graph-search-ansi.is-compact {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    background: transparent;
+    pointer-events: none;
+}
+
+.graph-search-ansi.is-compact .gs-visual {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    transition: opacity 400ms ease;
+}
+
+.graph-search-ansi.is-compact .gs-svg-node.gs-idle,
+.graph-search-ansi.is-compact .gs-svg-node.gs-closed {
+    fill: transparent;
+}
+
+.graph-search-ansi.is-wrapping .gs-visual {
+    opacity: 0.18;
+}
+
+.gs-svg-edge {
+    fill: none;
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    transition:
+        stroke 260ms ease,
+        stroke-width 260ms ease,
+        stroke-opacity 260ms ease;
+}
+
+.gs-svg-edge.gs-idle {
+    stroke: #2c332e;
+}
+
+.gs-svg-edge.gs-open {
+    stroke: #4d7f9a;
+}
+
+.gs-svg-edge.gs-closed {
+    stroke: #3d463f;
+}
+
+.gs-svg-edge.gs-path {
+    stroke: var(--home-accent, #c9ff4a);
+    stroke-width: 1.7;
+    filter: drop-shadow(0 0 4px rgba(201, 255, 74, 0.4));
+}
+
+.gs-svg-node {
+    stroke-width: 1.35;
+    transition:
+        fill 260ms ease,
+        stroke 260ms ease;
+}
+
+.gs-svg-node.gs-idle {
+    fill: #121614;
+    stroke: #3d463f;
+}
+
+.gs-svg-node.gs-open {
+    fill: #152028;
+    stroke: #7ec8ff;
+}
+
+.gs-svg-node.gs-closed {
+    fill: #171c19;
+    stroke: #6a7568;
+}
+
+.gs-svg-node.gs-current {
+    fill: #241614;
+    stroke: var(--home-hot, #ff7254);
+}
+
+.gs-svg-node.gs-path {
+    fill: #c9ff4a;
+    stroke: #e2ff9e;
+    filter: drop-shadow(0 0 5px rgba(201, 255, 74, 0.45));
+}
+
+.gs-svg-halo {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 1;
+    opacity: 0;
+    transition:
+        opacity 260ms ease,
+        stroke 260ms ease;
+}
+
+.gs-svg-halo.gs-open {
+    stroke: #7ec8ff;
+    opacity: 0.35;
+}
+
+.gs-svg-halo.gs-current {
+    stroke: var(--home-hot, #ff7254);
+    opacity: 0.55;
+    animation: gs-halo-pulse 1.05s ease-out infinite;
+}
+
+.gs-svg-halo.gs-path {
+    stroke: var(--home-accent, #c9ff4a);
+    opacity: 0.4;
+}
+
+.gs-svg-label {
+    fill: #667064;
+    font: 8px var(--font-mono);
+    letter-spacing: 0.06em;
+    text-anchor: middle;
+}
+
+@keyframes gs-halo-pulse {
+    0% {
+        opacity: 0.55;
+    }
+
+    100% {
+        opacity: 0;
+    }
 }

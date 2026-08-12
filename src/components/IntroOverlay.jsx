@@ -88,8 +88,41 @@ const IntroOverlay = () => {
     useEffect(() => {
         if (!isVisible) return undefined;
 
-        const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
+        // Lock scroll without changing html overflow — toggling it collapses
+        // scrollbar-gutter and shifts the centered layout when the intro ends.
+        const scrollX = window.scrollX;
+        const scrollY = window.scrollY;
+        const blockKeys = new Set([
+            ' ',
+            'ArrowUp',
+            'ArrowDown',
+            'ArrowLeft',
+            'ArrowRight',
+            'PageUp',
+            'PageDown',
+            'Home',
+            'End',
+        ]);
+
+        const preventScroll = (event) => {
+            event.preventDefault();
+        };
+        const preventScrollKeys = (event) => {
+            if (blockKeys.has(event.key)) {
+                event.preventDefault();
+            }
+        };
+        const keepScrollPosition = () => {
+            if (window.scrollX !== scrollX || window.scrollY !== scrollY) {
+                window.scrollTo(scrollX, scrollY);
+            }
+        };
+
+        window.addEventListener('wheel', preventScroll, { passive: false });
+        window.addEventListener('touchmove', preventScroll, { passive: false });
+        window.addEventListener('keydown', preventScrollKeys, { capture: true });
+        window.addEventListener('scroll', keepScrollPosition);
+
         let firstFrame;
         let secondFrame;
         let preloadTimer;
@@ -118,10 +151,13 @@ const IntroOverlay = () => {
 
         return () => {
             window.removeEventListener('load', revealPreloadedPage);
+            window.removeEventListener('wheel', preventScroll);
+            window.removeEventListener('touchmove', preventScroll);
+            window.removeEventListener('keydown', preventScrollKeys, { capture: true });
+            window.removeEventListener('scroll', keepScrollPosition);
             cancelAnimationFrame(firstFrame);
             cancelAnimationFrame(secondFrame);
             clearTimeout(preloadTimer);
-            document.body.style.overflow = previousOverflow;
         };
     }, [isVisible]);
 

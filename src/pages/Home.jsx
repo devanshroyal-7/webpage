@@ -1,6 +1,7 @@
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BashTypewriter from '../components/BashTypewriter';
+import Timeline from '../components/Timeline';
 import './Home.css';
 
 const HOME_ROLES = [
@@ -93,6 +94,8 @@ const Home = () => {
                     </a>
                 </div>
             </section>
+
+            <Timeline />
         </div>
     );
 };

@@ -3,12 +3,6 @@
     margin: 0 auto;
 }
 
-.flex-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-}
-
 .github-profile-link {
     display: flex;
     align-items: center;
@@ -30,7 +24,7 @@
 
 .repos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
     gap: 1rem;
 }
 
@@ -189,12 +183,6 @@
 }
 
 @media (max-width: 600px) {
-    .flex-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1.5rem;
-    }
-
     .github-profile-link {
         margin-top: 1rem;
     }
