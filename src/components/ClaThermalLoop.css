@@ -1,0 +1,129 @@
+.cla-thermal {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    border: 0;
+    background: transparent;
+    color: var(--timeline-hot, #ff7254);
+    pointer-events: none;
+}
+
+.cla-thermal svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+.cla-thermal svg * {
+    vector-effect: non-scaling-stroke;
+}
+
+.cla-shell {
+    fill: none;
+    stroke: #d5dbd4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.cla-near {
+    stroke-opacity: 0.34;
+}
+
+.cla-far {
+    stroke-opacity: 0.14;
+}
+
+.cla-cross {
+    stroke-opacity: 0.22;
+}
+
+.cla-guide {
+    stroke-opacity: 0.15;
+}
+
+.cla-wire {
+    fill: none;
+    stroke: #d5dbd4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.cla-fill {
+    stroke: none;
+}
+
+.cla-fill-cool,
+.cla-air {
+    fill: #7ec8ff;
+}
+
+.cla-fill-batt,
+.cla-heat-batt {
+    fill: #ff9a4a;
+}
+
+.cla-fill-motor,
+.cla-heat-motor {
+    fill: #ff5344;
+}
+
+.cla-fill-warm,
+.cla-heat-cabin {
+    fill: #ff7a5c;
+}
+
+.cla-flow {
+    fill: none;
+    stroke: #7ec8ff;
+    stroke-linecap: round;
+    stroke-dasharray: 3.2 5.4;
+}
+
+.cla-pulse {
+    fill: none;
+    stroke: #ff5344;
+}
+
+.cla-air {
+    filter: drop-shadow(0 0 1.4px rgba(126, 200, 255, 0.7));
+}
+
+.cla-heat-batt,
+.cla-heat-motor,
+.cla-heat-cabin {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.cla-heat-batt {
+    stroke: #ff9a4a;
+    filter: drop-shadow(0 0 1.2px rgba(255, 154, 74, 0.5));
+}
+
+.cla-heat-motor {
+    stroke: #ff5344;
+    filter: drop-shadow(0 0 1.2px rgba(255, 83, 68, 0.5));
+}
+
+.cla-heat-cabin {
+    stroke: #ff7a5c;
+}
+
+@media (max-width: 720px) {
+    .cla-thermal {
+        max-width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cla-thermal .cla-air,
+    .cla-thermal .cla-heat-batt,
+    .cla-thermal .cla-heat-motor {
+        filter: none;
+    }
+}

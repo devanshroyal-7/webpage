@@ -5,6 +5,10 @@ import {
     TIMELINE_ITEMS,
     TIMELINE_META,
 } from '../lib/timeline';
+import TimelineVisual, {
+    hasTimelineVisual,
+    visualKeyOf,
+} from './timelineVisuals';
 import './Timeline.css';
 
 const usePrefersReducedMotion = () => {
@@ -56,39 +60,57 @@ const TimelineItem = ({ item, index, isVisible, isActive, reduceMotion }) => {
                 <span className="timeline-node-ring" />
             </div>
 
-            <article className="timeline-entry">
-                <div className="timeline-entry-meta">
-                    <span className="timeline-index">
-                        {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <time className="timeline-period">{item.period}</time>
+            <article
+                className={`timeline-entry${hasTimelineVisual(item.visual) ? ' has-visual' : ''}`}
+            >
+                <div className="timeline-entry-copy">
+                    <div className="timeline-entry-meta">
+                        <span className="timeline-index">
+                            {String(index + 1).padStart(2, '0')}
+                        </span>
+                        <time className="timeline-period">{item.period}</time>
+                    </div>
+
+                    <h3 className="timeline-title">{heading}</h3>
+
+                    {(item.org || item.location) && (
+                        <p className="timeline-org">
+                            {item.org}
+                            {item.org && item.location ? ' · ' : null}
+                            {item.location}
+                        </p>
+                    )}
+
+                    {item.summary ? (
+                        <p className="timeline-summary">{item.summary}</p>
+                    ) : null}
+
+                    {item.tags?.length ? (
+                        <ul className="timeline-tags" aria-label="Tags">
+                            {item.tags.map((tag, tagIndex) => (
+                                <li
+                                    key={`${item.id}-${tag}`}
+                                    style={{ '--tag-index': tagIndex }}
+                                >
+                                    {tag}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : null}
                 </div>
 
-                <h3 className="timeline-title">{heading}</h3>
-
-                {(item.org || item.location) && (
-                    <p className="timeline-org">
-                        {item.org}
-                        {item.org && item.location ? ' · ' : null}
-                        {item.location}
-                    </p>
-                )}
-
-                {item.summary ? (
-                    <p className="timeline-summary">{item.summary}</p>
-                ) : null}
-
-                {item.tags?.length ? (
-                    <ul className="timeline-tags" aria-label="Tags">
-                        {item.tags.map((tag, tagIndex) => (
-                            <li
-                                key={`${item.id}-${tag}`}
-                                style={{ '--tag-index': tagIndex }}
-                            >
-                                {tag}
-                            </li>
-                        ))}
-                    </ul>
+                {hasTimelineVisual(item.visual) ? (
+                    <div
+                        className="timeline-entry-visual"
+                        data-visual={visualKeyOf(item.visual)}
+                        aria-hidden="true"
+                    >
+                        <TimelineVisual
+                            visual={item.visual}
+                            reduceMotion={reduceMotion}
+                            paused={!isVisible && !reduceMotion}
+                        />
+                    </div>
                 ) : null}
             </article>
         </li>
@@ -147,14 +169,16 @@ const Timeline = () => {
 
             const lastRect = lastItem?.getBoundingClientRect();
             const atPageBottom = remaining <= 2;
-            const endInView =
-                rect.bottom <= view
-                || (lastRect != null
-                    && lastRect.bottom <= view
-                    && lastRect.top < view);
+            const lastVisible =
+                lastRect != null
+                && lastRect.top < view
+                && lastRect.bottom <= view;
+            const spineEndVisible = rect.bottom <= view;
 
             setProgress(
-                atPageBottom || endInView ? 1 : Math.min(1, Math.max(0, raw)),
+                atPageBottom || lastVisible || spineEndVisible
+                    ? 1
+                    : Math.min(1, Math.max(0, raw)),
             );
         };
 

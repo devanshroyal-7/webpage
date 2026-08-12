@@ -42,7 +42,7 @@
 
 .timeline-track {
     position: relative;
-    max-width: 760px;
+    max-width: 880px;
     margin: 0 auto;
     padding-left: 1.35rem;
 }
@@ -190,7 +190,110 @@
 }
 
 .timeline-entry {
+    position: relative;
     padding-bottom: 0.25rem;
+}
+
+.timeline-entry.has-visual {
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.timeline-entry-copy {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+}
+
+.timeline-entry-visual {
+    position: absolute;
+    z-index: 0;
+    inset: 0 0 0 auto;
+    width: min(48%, 320px);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    padding: 0.2rem 0.15rem;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(10px);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 22%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 22%);
+    transition:
+        opacity 520ms ease 120ms,
+        transform 520ms cubic-bezier(0.22, 1, 0.36, 1) 120ms;
+}
+
+.timeline-entry-visual > * {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    min-height: 0;
+}
+
+.timeline-entry-visual svg,
+.timeline-entry-visual img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.timeline-entry:has(> [data-visual='camshaft']) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.1rem 1.35rem;
+    overflow: visible;
+}
+
+.timeline-entry:has(> [data-visual='camshaft']) .timeline-entry-copy {
+    flex: 1 1 220px;
+}
+
+.timeline-entry-visual[data-visual='camshaft'] {
+    position: relative;
+    inset: auto;
+    z-index: 0;
+    flex: 0 1 176px;
+    width: 176px;
+    max-width: 100%;
+    height: auto;
+    padding: 0;
+    overflow: visible;
+    mask-image: none;
+    -webkit-mask-image: none;
+    justify-content: center;
+}
+
+.timeline-entry-visual[data-visual='camshaft'] > * {
+    height: auto;
+}
+
+.timeline-entry-visual[data-visual='camshaft'] svg {
+    height: auto;
+}
+
+.timeline-visual-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.timeline-item.is-visible .timeline-entry-visual {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .timeline-entry-meta {
@@ -370,13 +473,38 @@
     .timeline-item {
         padding-left: 1.75rem;
     }
+
+    .timeline-entry-visual {
+        width: min(62%, 240px);
+        opacity: 0.7;
+    }
+
+    .timeline-item.is-visible .timeline-entry-visual {
+        opacity: 0.7;
+    }
+
+    .timeline-entry:has(> [data-visual='camshaft']) {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .timeline-entry-visual[data-visual='camshaft'] {
+        width: min(176px, 100%);
+        flex-basis: auto;
+        align-self: center;
+    }
+
+    .timeline-item.is-visible .timeline-entry-visual[data-visual='camshaft'] {
+        opacity: 1;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .timeline-header,
     .timeline-item,
     .timeline-summary,
-    .timeline-tags li {
+    .timeline-tags li,
+    .timeline-entry-visual {
         opacity: 1;
         filter: none;
         transform: none;
@@ -398,7 +526,8 @@
 .home-timeline.reduce-motion .timeline-header,
 .home-timeline.reduce-motion .timeline-item,
 .home-timeline.reduce-motion .timeline-summary,
-.home-timeline.reduce-motion .timeline-tags li {
+.home-timeline.reduce-motion .timeline-tags li,
+.home-timeline.reduce-motion .timeline-entry-visual {
     opacity: 1;
     filter: none;
     transform: none;

@@ -3,6 +3,7 @@ import './GraphSearchAnsi.css';
 
 const STEP_MS = 320;
 const HOLD_MS = 1800;
+const WRAP_MS = 420;
 
 const START = 'S';
 const GOAL = 'H';
@@ -166,6 +167,70 @@ function VEdge({ u, v, frame }) {
     return <span className={edgeClass(u, v, frame)}>│</span>;
 }
 
+const NODE_R = 6.5;
+const GRID = 68;
+const PAD = 24;
+const SVG_SIZE = PAD * 2 + GRID * 2;
+const SVG_HEIGHT = SVG_SIZE + 12;
+
+function nodeXY(id) {
+    const [col, row] = POS[id];
+    return [PAD + col * GRID, PAD + row * GRID];
+}
+
+function GraphVisual({ frame }) {
+    const ids = Object.keys(POS);
+
+    return (
+        <svg
+            className="gs-visual"
+            viewBox={`0 0 ${SVG_SIZE} ${SVG_HEIGHT}`}
+            preserveAspectRatio="xMidYMid meet"
+            aria-hidden="true"
+        >
+            {EDGES.map(([u, v]) => {
+                const [x1, y1] = nodeXY(u);
+                const [x2, y2] = nodeXY(v);
+                return (
+                    <line
+                        key={`${u}-${v}`}
+                        className={`gs-svg-edge ${edgeClass(u, v, frame)}`}
+                        x1={x1}
+                        y1={y1}
+                        x2={x2}
+                        y2={y2}
+                    />
+                );
+            })}
+            {ids.map((id) => {
+                const [x, y] = nodeXY(id);
+                const cls = cellClass(id, frame);
+                return (
+                    <g key={id}>
+                        <circle
+                            className={`gs-svg-halo ${cls}`}
+                            cx={x}
+                            cy={y}
+                            r={NODE_R + 7}
+                        />
+                        <circle
+                            className={`gs-svg-node ${cls}`}
+                            cx={x}
+                            cy={y}
+                            r={NODE_R}
+                        />
+                        {id === START || id === GOAL ? (
+                            <text className="gs-svg-label" x={x} y={y + NODE_R + 13}>
+                                {id === START ? 'S' : 'G'}
+                            </text>
+                        ) : null}
+                    </g>
+                );
+            })}
+        </svg>
+    );
+}
+
 function GraphFrame({ frame }) {
     return (
         <div className="gs-graph" aria-hidden="true">
@@ -208,8 +273,9 @@ function GraphFrame({ frame }) {
     );
 }
 
-const GraphSearchAnsi = () => {
+const GraphSearchAnsi = ({ compact = false, paused = false }) => {
     const [frameIndex, setFrameIndex] = useState(0);
+    const [wrapping, setWrapping] = useState(false);
     const [reduceMotion] = useState(
         () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     );
@@ -217,6 +283,12 @@ const GraphSearchAnsi = () => {
     useEffect(() => {
         if (reduceMotion) {
             setFrameIndex(FRAMES.length - 1);
+            setWrapping(false);
+        }
+    }, [reduceMotion]);
+
+    useEffect(() => {
+        if (reduceMotion || paused || wrapping) {
             return undefined;
         }
 
@@ -224,55 +296,87 @@ const GraphSearchAnsi = () => {
         const delay = frame.status === 'PATH' ? HOLD_MS : STEP_MS;
 
         const timer = window.setTimeout(() => {
-            setFrameIndex((i) => (i + 1) % FRAMES.length);
+            if (compact && frame.status === 'PATH') {
+                setWrapping(true);
+            } else {
+                setFrameIndex((i) => (i + 1) % FRAMES.length);
+            }
         }, delay);
 
         return () => window.clearTimeout(timer);
-    }, [frameIndex, reduceMotion]);
+    }, [compact, frameIndex, reduceMotion, paused, wrapping]);
+
+    useEffect(() => {
+        if (!wrapping) {
+            return undefined;
+        }
+
+        const timer = window.setTimeout(() => {
+            setFrameIndex(0);
+            window.requestAnimationFrame(() => {
+                window.requestAnimationFrame(() => setWrapping(false));
+            });
+        }, WRAP_MS);
+
+        return () => window.clearTimeout(timer);
+    }, [wrapping]);
 
     const frame = FRAMES[frameIndex];
     const openList = frame.open.filter((id) => !frame.closed.includes(id));
     const pathStr = frame.path ? frame.path.join('→') : '—';
+    const className = [
+        'graph-search-ansi',
+        compact ? 'is-compact' : '',
+        wrapping ? 'is-wrapping' : '',
+    ]
+        .filter(Boolean)
+        .join(' ');
 
     return (
         <div
-            className="graph-search-ansi"
+            className={className}
             role="img"
             aria-label="Animated A-star graph search from S to H"
         >
-            <div className="gs-header">
-                <span className="gs-prompt">$</span> a* --graph 3x3 --h manhattan
-            </div>
-            <GraphFrame frame={frame} />
-            <div className="gs-meta">
-                <div>
-                    <span className="gs-key">open</span>{' '}
-                    <span className="gs-open">
-                        [{openList.length ? openList.join(' ') : '∅'}]
-                    </span>
-                </div>
-                <div>
-                    <span className="gs-key">closed</span>{' '}
-                    <span className="gs-closed">
-                        [{frame.closed.length ? frame.closed.join(' ') : '∅'}]
-                    </span>
-                </div>
-                <div>
-                    <span className="gs-key">path</span>{' '}
-                    <span className={frame.path ? 'gs-path' : 'gs-idle'}>{pathStr}</span>
-                </div>
-                <div className="gs-status">
-                    <span className="gs-key">status</span>{' '}
-                    <span className="gs-current">{frame.status}</span>
-                    <span className="gs-cursor">_</span>
-                </div>
-            </div>
-            <div className="gs-legend" aria-hidden="true">
-                <span className="gs-open">◎ open</span>
-                <span className="gs-closed">● closed</span>
-                <span className="gs-current">◉ curr</span>
-                <span className="gs-path">◆ path</span>
-            </div>
+            {compact ? (
+                <GraphVisual frame={frame} />
+            ) : (
+                <>
+                    <div className="gs-header">
+                        <span className="gs-prompt">$</span> a* --graph 3x3 --h manhattan
+                    </div>
+                    <GraphFrame frame={frame} />
+                    <div className="gs-meta">
+                        <div>
+                            <span className="gs-key">open</span>{' '}
+                            <span className="gs-open">
+                                [{openList.length ? openList.join(' ') : '∅'}]
+                            </span>
+                        </div>
+                        <div>
+                            <span className="gs-key">closed</span>{' '}
+                            <span className="gs-closed">
+                                [{frame.closed.length ? frame.closed.join(' ') : '∅'}]
+                            </span>
+                        </div>
+                        <div>
+                            <span className="gs-key">path</span>{' '}
+                            <span className={frame.path ? 'gs-path' : 'gs-idle'}>{pathStr}</span>
+                        </div>
+                        <div className="gs-status">
+                            <span className="gs-key">status</span>{' '}
+                            <span className="gs-current">{frame.status}</span>
+                            <span className="gs-cursor">_</span>
+                        </div>
+                    </div>
+                    <div className="gs-legend" aria-hidden="true">
+                        <span className="gs-open">◎ open</span>
+                        <span className="gs-closed">● closed</span>
+                        <span className="gs-current">◉ curr</span>
+                        <span className="gs-path">◆ path</span>
+                    </div>
+                </>
+            )}
         </div>
     );
 };

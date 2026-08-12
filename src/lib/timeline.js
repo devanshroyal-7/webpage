@@ -2,8 +2,9 @@
  * Homepage timeline content.
  *
  * Toggle with TIMELINE_ENABLED.
- * Add / remove / reorder entries in TIMELINE_ITEMS — the Timeline component
- * renders whatever is listed here.
+ * Add / remove / reorder entries in TIMELINE_ITEMS — Timeline renders
+ * this list as-is. Each object is one event; copy is independent of the
+ * optional visual overlay.
  *
  * Shape of each item:
  * {
@@ -14,9 +15,18 @@
  *   location?: string,
  *   summary?: string,           // short supporting sentence
  *   tags?: string[],            // optional mono chips
- *   href?: string,              // optional external link on the title/org
+ *   href?: string,              // optional external link on the title
  *   accent?: 'accent' | 'hot',  // node color (default accent)
+ *
+ *   // Optional overlay. Default fit is contain: the visual scales to sit
+ *   // fully inside the entry bounding box (no overflow/clip). Any of:
+ *   visual?: string,            // key in TIMELINE_VISUALS
+ *                               //   ('graph-search' | 'cla-thermal' | 'camshaft')
+ *   visual?: { src, alt },      // static image
+ *   visual?: Component,         // any React component ({ paused, reduceMotion })
  * }
+ *
+ * Register new animations in src/components/timelineVisuals.jsx.
  */
 
 export const TIMELINE_ENABLED = true;
@@ -40,6 +50,7 @@ export const TIMELINE_ITEMS = [
         tags: ['Planning', 'Manipulation', 'Learning'],
         href: 'https://www.ri.cmu.edu/robotics-groups/search-based-planning-laboratory/',
         accent: 'accent',
+        visual: 'graph-search',
     },
     {
         id: 'mercedes',
@@ -51,6 +62,7 @@ export const TIMELINE_ITEMS = [
             'Built simulation workflows for mechanical systems — translating physical constraints into models that informed product decisions.',
         tags: ['Simulation', 'Automotive', 'CAE'],
         accent: 'hot',
+        visual: 'cla-thermal',
     },
     {
         id: 'iitm',
@@ -59,8 +71,9 @@ export const TIMELINE_ITEMS = [
         org: 'IIT Madras',
         location: 'Chennai, India',
         summary:
-            'Grounded in mechanical systems and computation; patented an internal combustion mechanism along the way.',
+            'Grounded in mechanical systems and computation; patented a camshaft mechanism along the way.',
         tags: ['Mechanics', 'Patent', 'Research'],
         accent: 'accent',
+        visual: 'camshaft',
     },
 ];

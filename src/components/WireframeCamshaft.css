@@ -1,0 +1,77 @@
+.wireframe-camshaft {
+    width: 100%;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    pointer-events: none;
+}
+
+.wireframe-camshaft svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.wireframe-camshaft svg * {
+    vector-effect: non-scaling-stroke;
+}
+
+.wf-cam-solid,
+.wf-cam-lobe,
+.wf-cam-shell,
+.wf-cam-core,
+.wf-cam-shaft,
+.wf-cam-belt {
+    stroke: var(--timeline-accent, #c9ff4a);
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.wf-cam-solid {
+    fill: rgba(201, 255, 74, 0.28);
+    stroke-width: 1.05;
+}
+
+.wf-cam-lobe {
+    fill: rgba(201, 255, 74, 0.38);
+    stroke-width: 1.1;
+}
+
+.wf-cam-shell {
+    fill: rgba(201, 255, 74, 0.1);
+    stroke-width: 1.05;
+}
+
+.wf-cam-core {
+    fill: rgba(201, 255, 74, 0.2);
+    stroke-width: 0.9;
+}
+
+.wf-cam-shaft {
+    fill: rgba(201, 255, 74, 0.22);
+    stroke-width: 0.95;
+}
+
+.wf-cam-belt {
+    fill: rgba(201, 255, 74, 0.08);
+    stroke-width: 1.35;
+}
+
+.wf-cam-pin {
+    fill: #0d110f;
+    stroke: var(--timeline-accent, #c9ff4a);
+    stroke-width: 0.95;
+}
+
+@media (max-width: 720px) {
+    .wireframe-camshaft {
+        max-width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wireframe-camshaft svg {
+        transform: none;
+    }
+}

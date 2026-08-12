@@ -30,7 +30,6 @@
 .footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     padding: 1.25rem 0;
     margin-top: 5rem;
     color: var(--text-secondary);
@@ -43,11 +42,6 @@
 
 .footer p {
     margin: 0;
-}
-
-.footer::after {
-    content: "SYSTEM // ONLINE";
-    color: var(--accent-color);
 }
 
 @keyframes fadeIn {
@@ -69,7 +63,5 @@
 
     .footer {
         align-items: flex-start;
-        flex-direction: column;
-        gap: 0.5rem;
     }
 }

@@ -11,7 +11,7 @@ const Layout = () => {
                     <Outlet />
                 </main>
                 <footer className="footer">
-                    <p>© {new Date().getFullYear()} Devansh · Built between simulations</p>
+                    <p>© {new Date().getFullYear()} Devansh</p>
                 </footer>
             </div>
         </div>
