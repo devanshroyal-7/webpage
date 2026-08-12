@@ -5,8 +5,6 @@ const TAU = Math.PI * 2;
 const REST_CRANK = 28;
 const CYCLE_DEG = 720;
 const SCROLL_DEG_PER_PX = 0.7;
-const IDLE_DEG_PER_MS = 360 / 14000;
-const IDLE_DELAY_MS = 160;
 
 const VB_W = 168;
 const VB_H = 208;
@@ -147,7 +145,7 @@ const STEM = CYL_TOP + 2 - TAPPET_CLEAR;
 
 const wrapCycle = (deg) => ((deg % CYCLE_DEG) + CYCLE_DEG) % CYCLE_DEG;
 
-const WireframeCamshaft = ({ reduceMotion = false, paused = false }) => {
+const WireframeCamshaft = ({ reduceMotion = false }) => {
     const svgRef = useRef(null);
     const angleRef = useRef(REST_CRANK);
 
@@ -172,6 +170,10 @@ const WireframeCamshaft = ({ reduceMotion = false, paused = false }) => {
                 el.setAttribute('transform', `rotate(${crankDeg})`);
             });
 
+            root.querySelectorAll('[data-counter-spin]').forEach((el) => {
+                el.setAttribute('transform', `rotate(${-crankDeg})`);
+            });
+
             root
                 .querySelector('[data-piston]')
                 ?.setAttribute('transform', `translate(${CYL_X} ${k.pTop})`);
@@ -190,10 +192,7 @@ const WireframeCamshaft = ({ reduceMotion = false, paused = false }) => {
             return undefined;
         }
 
-        let raf = 0;
-        let lastTs = performance.now();
         let lastY = window.scrollY || document.documentElement.scrollTop || 0;
-        let lastScrollAt = 0;
 
         const onScroll = () => {
             const y = window.scrollY || document.documentElement.scrollTop || 0;
@@ -202,31 +201,16 @@ const WireframeCamshaft = ({ reduceMotion = false, paused = false }) => {
             if (dy === 0) {
                 return;
             }
-            lastScrollAt = performance.now();
-            angleRef.current += Math.abs(dy) * SCROLL_DEG_PER_PX;
+            angleRef.current += dy * SCROLL_DEG_PER_PX;
             apply(angleRef.current);
         };
 
-        const tick = (now) => {
-            const dt = Math.min(48, now - lastTs);
-            lastTs = now;
-
-            if (!paused && !document.hidden && now - lastScrollAt > IDLE_DELAY_MS) {
-                angleRef.current += dt * IDLE_DEG_PER_MS;
-                apply(angleRef.current);
-            }
-
-            raf = window.requestAnimationFrame(tick);
-        };
-
         window.addEventListener('scroll', onScroll, { passive: true });
-        raf = window.requestAnimationFrame(tick);
 
         return () => {
-            window.cancelAnimationFrame(raf);
             window.removeEventListener('scroll', onScroll);
         };
-    }, [paused, reduceMotion]);
+    }, [reduceMotion]);
 
     return (
         <div
@@ -316,10 +300,15 @@ const WireframeCamshaft = ({ reduceMotion = false, paused = false }) => {
 
                 <g transform={`translate(${CYL_X} ${CRANK_Y})`}>
                     <g
+                        data-counter-spin=""
+                        transform={`rotate(${-REST_CRANK})`}
+                    >
+                        <path className="wf-cam-solid" d={COUNTERWEIGHT_D} />
+                    </g>
+                    <g
                         data-crank-spin=""
                         transform={`rotate(${REST_CRANK})`}
                     >
-                        <path className="wf-cam-solid" d={COUNTERWEIGHT_D} />
                         <rect
                             className="wf-cam-core"
                             x="-3.6"

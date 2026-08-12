@@ -36,14 +36,9 @@ export function jumpToTop() {
     window.scrollTo(0, 0);
 }
 
-function easeSnappyRamp(t) {
-    if (t < 0.2) {
-        const u = t / 0.2;
-        return 0.14 * u * u;
-    }
-
-    const u = (t - 0.2) / 0.8;
-    return 0.14 + 0.86 * (1 - (1 - u) ** 4);
+function easeSilkyRamp(t) {
+    const t2 = t * t;
+    return t2 * (10 + t * (-20 + t * (15 - 4 * t)));
 }
 
 export function smoothScrollToTop() {
@@ -60,7 +55,7 @@ export function smoothScrollToTop() {
         return;
     }
 
-    const duration = Math.min(480, Math.max(220, Math.sqrt(start) * 16));
+    const duration = Math.min(980, Math.max(480, Math.sqrt(start) * 24));
     const t0 = performance.now();
 
     onInterrupt = (event) => {
@@ -76,7 +71,7 @@ export function smoothScrollToTop() {
 
     const tick = (now) => {
         const t = Math.min(1, (now - t0) / duration);
-        window.scrollTo(0, start * (1 - easeSnappyRamp(t)));
+        window.scrollTo(0, start * (1 - easeSilkyRamp(t)));
 
         if (t < 1) {
             rafId = requestAnimationFrame(tick);

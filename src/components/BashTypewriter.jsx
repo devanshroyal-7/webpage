@@ -11,6 +11,14 @@ const typedOnceKeys = new Set();
 /** Pending marks deferred so React Strict Mode remounts don't skip the first animation. */
 const pendingOnceMarks = new Map();
 
+const TypewriterLine = ({ text }) => (
+    <>
+        <span className="bash-prompt">&gt;</span>
+        <span>{text}</span>
+        <span className="bash-cursor" />
+    </>
+);
+
 const BashTypewriter = ({
     phrases,
     cycle = false,
@@ -108,10 +116,11 @@ const BashTypewriter = ({
             className={`bash-typewriter ${className}`.trim()}
             aria-label={cycle ? phrases.join(', ') : currentPhrase}
         >
+            <span className="bash-typewriter-sizer" aria-hidden="true">
+                <TypewriterLine text={currentPhrase} />
+            </span>
             <span className="bash-typewriter-visual" aria-hidden="true">
-                <span className="bash-prompt">&gt;</span>
-                <span>{visibleText}</span>
-                <span className="bash-cursor" />
+                <TypewriterLine text={visibleText} />
             </span>
         </p>
     );
