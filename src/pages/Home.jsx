@@ -1,7 +1,6 @@
-import { ArrowUpRight, Github, Mail } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BashTypewriter from '../components/BashTypewriter';
-import GraphSearchAnsi from '../components/GraphSearchAnsi';
 import './Home.css';
 
 const HOME_ROLES = [
@@ -18,7 +17,7 @@ const Home = () => {
         <div className="home-page">
             <section className="hero" aria-labelledby="hero-title">
                 <div className="hero-index" aria-hidden="true">
-                    <span>01 / 03</span>
+                    <span>01 / 04</span>
                     <span>ROBOTICS · PLANNING · CONTROL</span>
                 </div>
 
@@ -92,28 +91,6 @@ const Home = () => {
                         Search-Based Planning Lab
                         <ArrowUpRight size={16} />
                     </a>
-                </div>
-
-                <div className="ansi-card">
-                    <div className="ansi-title">
-                        <span>devansh@sbpl:~</span>
-                        <span>a*</span>
-                    </div>
-                    <GraphSearchAnsi />
-                    <div className="ansi-footer">
-                        <a
-                            href="https://github.com/devanshroyal-7"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label="GitHub profile"
-                        >
-                            <Github size={18} />
-                        </a>
-                        <a href="mailto:djonnala@andrew.cmu.edu" aria-label="Email Devansh">
-                            <Mail size={18} />
-                        </a>
-                        <span>Photography · cooking · birds</span>
-                    </div>
                 </div>
             </section>
         </div>

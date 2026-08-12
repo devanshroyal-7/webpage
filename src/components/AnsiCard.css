@@ -1,0 +1,60 @@
+.ansi-card {
+    align-self: start;
+    overflow: hidden;
+    border: 1px solid rgba(201, 255, 74, 0.3);
+    border-radius: 2px;
+    background: #090c0a;
+    box-shadow: 9px 9px 0 rgba(201, 255, 74, 0.09);
+    color: var(--home-accent);
+    font-family: var(--font-mono);
+    transform: translateY(1rem);
+}
+
+.ansi-title,
+.ansi-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 0.7rem;
+    border-bottom: 1px solid rgba(201, 255, 74, 0.2);
+    color: #81907f;
+    font-size: 0.58rem;
+    letter-spacing: 0.07em;
+}
+
+.ansi-card pre,
+.ansi-card .graph-search-ansi {
+    min-height: 270px;
+}
+
+.ansi-footer {
+    justify-content: flex-start;
+    gap: 0.8rem;
+    border-top: 1px solid rgba(201, 255, 74, 0.2);
+    border-bottom: 0;
+}
+
+.ansi-footer a {
+    display: inline-flex;
+    color: var(--home-accent);
+}
+
+.ansi-footer span {
+    margin-left: auto;
+    color: #667064;
+    text-align: right;
+}
+
+@media (max-width: 900px) {
+    .ansi-card {
+        width: min(100%, 430px);
+    }
+}
+
+@media (max-width: 600px) {
+    .ansi-card {
+        width: 100%;
+        max-width: 100%;
+        transform: none;
+    }
+}

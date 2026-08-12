@@ -64,7 +64,7 @@ const GitHub = () => {
         <div className="github-container">
             <header className="page-header flex-header">
                 <div className="page-kicker">
-                    <span>03 / 03</span>
+                    <span>03 / 04</span>
                     <span>REPOSITORY.INDEX</span>
                 </div>
                 <div>
@@ -72,6 +72,7 @@ const GitHub = () => {
                     <BashTypewriter
                         phrases={GITHUB_SUBTITLE}
                         className="subtitle"
+                        onceKey="github-subtitle"
                     />
                 </div>
                 <a

@@ -6,27 +6,59 @@ const DELETE_DELAY = 32;
 const HOLD_DELAY = 3000;
 const NEXT_LINE_DELAY = 180;
 
+/** Keys that have already typed once this page session (survives SPA remounts). */
+const typedOnceKeys = new Set();
+/** Pending marks deferred so React Strict Mode remounts don't skip the first animation. */
+const pendingOnceMarks = new Map();
+
 const BashTypewriter = ({
     phrases,
     cycle = false,
     className = '',
     startDelay = 0,
+    onceKey = null,
 }) => {
+    const alreadyTyped = Boolean(onceKey && typedOnceKeys.has(onceKey));
     const [phraseIndex, setPhraseIndex] = useState(0);
-    const [visibleText, setVisibleText] = useState('');
-    const [phase, setPhase] = useState(
-        () => (startDelay > 0 ? 'waiting' : 'typing'),
+    const [visibleText, setVisibleText] = useState(
+        () => (alreadyTyped ? phrases[0] : ''),
     );
+    const [phase, setPhase] = useState(() => {
+        if (alreadyTyped) return 'done';
+        return startDelay > 0 ? 'waiting' : 'typing';
+    });
     const [reduceMotion] = useState(
         () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     );
 
     const currentPhrase = phrases[phraseIndex];
 
+    // Mark as typed when leaving the page, even mid-animation, so revisits show full text.
     useEffect(() => {
-        if (reduceMotion) {
+        if (!onceKey) {
+            return undefined;
+        }
+
+        const pending = pendingOnceMarks.get(onceKey);
+        if (pending !== undefined) {
+            window.clearTimeout(pending);
+            pendingOnceMarks.delete(onceKey);
+        }
+
+        return () => {
+            const timer = window.setTimeout(() => {
+                typedOnceKeys.add(onceKey);
+                pendingOnceMarks.delete(onceKey);
+            }, 0);
+            pendingOnceMarks.set(onceKey, timer);
+        };
+    }, [onceKey]);
+
+    useEffect(() => {
+        if (reduceMotion || alreadyTyped) {
             setVisibleText(currentPhrase);
             setPhase('done');
+            if (onceKey) typedOnceKeys.add(onceKey);
             return undefined;
         }
 
@@ -40,6 +72,7 @@ const BashTypewriter = ({
                     setVisibleText(currentPhrase.slice(0, visibleText.length + 1));
                 }, TYPE_DELAY);
             } else {
+                if (onceKey) typedOnceKeys.add(onceKey);
                 setPhase(cycle ? 'holding' : 'done');
             }
         } else if (phase === 'holding') {
@@ -59,8 +92,10 @@ const BashTypewriter = ({
 
         return () => window.clearTimeout(timer);
     }, [
+        alreadyTyped,
         currentPhrase,
         cycle,
+        onceKey,
         phase,
         phrases.length,
         reduceMotion,

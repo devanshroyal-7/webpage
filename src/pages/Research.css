@@ -7,7 +7,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
-    animation: fadeIn 0.8s ease-out;
 }
 
 .research-panel {
@@ -19,6 +18,8 @@
     background:
         linear-gradient(145deg, rgba(201, 255, 74, 0.035), transparent 38%),
         rgba(255, 255, 255, 0.018);
+    animation: fadeIn 0.5s ease-out forwards;
+    opacity: 0;
     transition: border-color 180ms ease, transform 180ms ease;
 }
 
@@ -176,11 +177,56 @@
     border-bottom: 1px solid var(--glass-border);
 }
 
+.course-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
 .course-heading h3 {
     margin: 0;
     color: var(--text-primary);
     font-size: 0.95rem;
     font-weight: 600;
+}
+
+.course-profs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.course-prof {
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    width: fit-content;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.course-prof-term {
+    margin-left: 0.45rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.course-prof-term::before {
+    content: '·';
+    margin-right: 0.45rem;
+}
+
+.course-prof:hover {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+}
+
+.course-prof:hover .course-prof-term {
+    color: var(--accent-color);
+    opacity: 0.85;
 }
 
 .course-heading time {
@@ -232,5 +278,12 @@
 
     .teaching-meta > span {
         text-align: left;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .research-panel {
+        animation: none;
+        opacity: 1;
     }
 }
