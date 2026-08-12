@@ -17,7 +17,7 @@ const Home = () => {
     return (
         <div className="home-page">
             <section className="hero" aria-labelledby="hero-title">
-                <div className="hero-index" aria-hidden="true">
+                <div className="page-kicker hero-index" aria-hidden="true">
                     <span>01 / 04</span>
                     <span>ROBOTICS · PLANNING · CONTROL</span>
                 </div>

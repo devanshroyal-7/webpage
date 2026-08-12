@@ -1,10 +1,23 @@
 .bash-typewriter {
+    position: relative;
     min-height: 1.65em;
     font-family: var(--font-mono);
 }
 
+.bash-typewriter-sizer {
+    display: block;
+    visibility: hidden;
+    pointer-events: none;
+    user-select: none;
+}
+
+.bash-typewriter-sizer .bash-cursor {
+    animation: none;
+}
+
 .bash-typewriter-visual {
-    display: inline;
+    position: absolute;
+    inset: 0;
 }
 
 .bash-prompt {
