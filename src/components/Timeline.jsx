@@ -26,7 +26,7 @@ const usePrefersReducedMotion = () => {
     return reduced;
 };
 
-const TimelineItem = ({ item, index, isVisible, isActive, reduceMotion }) => {
+const TimelineItem = ({ item, index, isVisible, isActive, isReached, reduceMotion }) => {
     const accentClass = item.accent === 'hot' ? 'is-hot' : 'is-accent';
     const heading = item.href ? (
         <a
@@ -48,6 +48,7 @@ const TimelineItem = ({ item, index, isVisible, isActive, reduceMotion }) => {
                 'timeline-item',
                 accentClass,
                 isVisible || reduceMotion ? 'is-visible' : '',
+                reduceMotion || isReached ? 'is-reached' : 'is-pending',
                 isActive ? 'is-active' : '',
             ]
                 .filter(Boolean)
@@ -108,7 +109,7 @@ const TimelineItem = ({ item, index, isVisible, isActive, reduceMotion }) => {
                         <TimelineVisual
                             visual={item.visual}
                             reduceMotion={reduceMotion}
-                            paused={!isVisible && !reduceMotion}
+                            paused={(!isReached || !isVisible) && !reduceMotion}
                         />
                     </div>
                 ) : null}
@@ -126,8 +127,10 @@ const Timeline = () => {
     const sectionRef = useRef(null);
     const spineRef = useRef(null);
     const [visible, setVisible] = useState(() => new Set());
+    const [reached, setReached] = useState(
+        () => (reduceMotion ? new Set(TIMELINE_ITEMS.map((item) => item.id)) : new Set()),
+    );
     const [activeId, setActiveId] = useState(null);
-    const [progress, setProgress] = useState(reduceMotion ? 1 : 0);
     const [headerVisible, setHeaderVisible] = useState(reduceMotion);
 
     useEffect(() => {
@@ -141,46 +144,139 @@ const Timeline = () => {
             return undefined;
         }
 
-        const lastItem = section.querySelector('[data-timeline-item]:last-of-type');
+        const targetRef = { current: reduceMotion ? 1 : 0 };
+        const displayRef = { current: reduceMotion ? 1 : 0 };
+        let lastScrollAt = 0;
+        let lastTs = performance.now();
+        let raf = 0;
 
-        const updateProgress = () => {
+        const readTarget = () => {
             if (reduceMotion) {
-                setProgress(1);
-                return;
+                return 1;
             }
 
             const rect = spine.getBoundingClientRect();
             const view = window.innerHeight || 1;
-            const start = view * 0.75;
-            const idealEnd = view * 0.25;
+            const anchorY = view * (2 / 3);
+            const raw = (anchorY - rect.top) / Math.max(rect.height, 1);
 
-            // Original mapping hits 1 when the spine bottom is at 25vh.
-            // The timeline sits near the page bottom (footer below), so that
-            // position is often unreachable — remap the end to the spine
-            // bottom's Y at max scroll so progress still reaches 1.
             const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
             const maxScroll = Math.max(0, document.documentElement.scrollHeight - view);
             const remaining = Math.max(0, maxScroll - scrollY);
-            const bottomAtMaxScroll = rect.bottom - remaining;
-            const end = Math.max(idealEnd, bottomAtMaxScroll);
-
-            const denom = rect.height + (start - end);
-            const raw = denom <= 0 ? 1 : (start - rect.top) / denom;
-
-            const lastRect = lastItem?.getBoundingClientRect();
             const atPageBottom = remaining <= 2;
-            const lastVisible =
-                lastRect != null
-                && lastRect.top < view
-                && lastRect.bottom <= view;
-            const spineEndVisible = rect.bottom <= view;
 
-            setProgress(
-                atPageBottom || lastVisible || spineEndVisible
-                    ? 1
-                    : Math.min(1, Math.max(0, raw)),
-            );
+            return atPageBottom ? 1 : Math.min(1, Math.max(0, raw));
         };
+
+        const writeProgress = (value) => {
+            spine.style.setProperty('--timeline-progress', String(value));
+        };
+
+        const reachedRef = {
+            current: reduceMotion
+                ? new Set(TIMELINE_ITEMS.map((item) => item.id))
+                : new Set(),
+        };
+        const activeRef = { current: null };
+
+        const syncItemStates = (progress) => {
+            const spineRect = spine.getBoundingClientRect();
+            const height = Math.max(spineRect.height, 1);
+            const nextReached = new Set();
+            let nextActive = null;
+            let bestPop = 0;
+
+            section.querySelectorAll('[data-timeline-item]').forEach((el) => {
+                const id = el.getAttribute('data-timeline-item');
+                const node = el.querySelector('.timeline-node');
+                if (!id || !node) {
+                    return;
+                }
+
+                const nodeRect = node.getBoundingClientRect();
+                const at = (nodeRect.top + nodeRect.height * 0.5 - spineRect.top) / height;
+                const isLit = reduceMotion || progress >= at - 0.006;
+                if (isLit) {
+                    nextReached.add(id);
+                }
+
+                const dist = Math.max(0, progress - at);
+                const pop = isLit ? Math.exp(-((dist / 0.08) ** 2)) : 0;
+                el.querySelector('.timeline-entry')?.style.setProperty(
+                    '--item-pop',
+                    pop.toFixed(4),
+                );
+
+                if (pop > bestPop) {
+                    bestPop = pop;
+                    nextActive = id;
+                }
+            });
+
+            if (bestPop < 0.2) {
+                nextActive = null;
+            }
+
+            const reachedChanged =
+                nextReached.size !== reachedRef.current.size
+                || [...nextReached].some((id) => !reachedRef.current.has(id));
+            if (reachedChanged) {
+                reachedRef.current = nextReached;
+                setReached(new Set(nextReached));
+            }
+            if (nextActive !== activeRef.current) {
+                activeRef.current = nextActive;
+                setActiveId(nextActive);
+            }
+        };
+
+        const onScroll = () => {
+            lastScrollAt = performance.now();
+            targetRef.current = readTarget();
+            if (!raf) {
+                lastTs = lastScrollAt;
+                raf = window.requestAnimationFrame(tick);
+            }
+        };
+
+        const tick = (now) => {
+            const dt = Math.min(0.048, (now - lastTs) / 1000);
+            lastTs = now;
+
+            if (reduceMotion) {
+                displayRef.current = 1;
+                writeProgress(1);
+                syncItemStates(1);
+                raf = 0;
+                return;
+            }
+
+            const scrolling = now - lastScrollAt < 90;
+            const tau = scrolling ? 0.022 : 0.11;
+            const k = 1 - Math.exp(-dt / tau);
+            displayRef.current += (targetRef.current - displayRef.current) * k;
+
+            if (Math.abs(targetRef.current - displayRef.current) < 0.0003) {
+                displayRef.current = targetRef.current;
+            }
+
+            writeProgress(displayRef.current);
+            syncItemStates(displayRef.current);
+
+            if (displayRef.current === targetRef.current && !scrolling) {
+                raf = 0;
+                return;
+            }
+
+            raf = window.requestAnimationFrame(tick);
+        };
+
+        onScroll();
+        writeProgress(displayRef.current);
+        syncItemStates(displayRef.current);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll);
+        raf = window.requestAnimationFrame(tick);
 
         const itemObserver = new IntersectionObserver(
             (entries) => {
@@ -195,18 +291,6 @@ const Timeline = () => {
                     });
                     return next;
                 });
-
-                const intersecting = entries
-                    .filter((entry) => entry.isIntersecting)
-                    .sort(
-                        (a, b) =>
-                            Math.abs(a.boundingClientRect.top - window.innerHeight * 0.4)
-                            - Math.abs(b.boundingClientRect.top - window.innerHeight * 0.4),
-                    );
-
-                if (intersecting[0]) {
-                    setActiveId(intersecting[0].target.getAttribute('data-timeline-item'));
-                }
             },
             {
                 threshold: [0.2, 0.45, 0.7],
@@ -233,15 +317,12 @@ const Timeline = () => {
         const nodes = section.querySelectorAll('[data-timeline-item]');
         nodes.forEach((node) => itemObserver.observe(node));
 
-        updateProgress();
-        window.addEventListener('scroll', updateProgress, { passive: true });
-        window.addEventListener('resize', updateProgress);
-
         return () => {
             itemObserver.disconnect();
             headerObserver?.disconnect();
-            window.removeEventListener('scroll', updateProgress);
-            window.removeEventListener('resize', updateProgress);
+            window.cancelAnimationFrame(raf);
+            window.removeEventListener('scroll', onScroll);
+            window.removeEventListener('resize', onScroll);
         };
     }, [reduceMotion]);
 
@@ -254,7 +335,6 @@ const Timeline = () => {
             className={`home-timeline${reduceMotion ? ' reduce-motion' : ''}`}
             aria-labelledby="timeline-title"
             ref={sectionRef}
-            style={{ '--timeline-progress': progress }}
         >
             <header
                 className={`timeline-header${headerVisible ? ' is-visible' : ''}`}
@@ -285,6 +365,7 @@ const Timeline = () => {
                             item={item}
                             index={index}
                             isVisible={visible.has(item.id)}
+                            isReached={reached.has(item.id)}
                             isActive={activeId === item.id}
                             reduceMotion={reduceMotion}
                         />

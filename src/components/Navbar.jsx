@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { Link, useLocation } from 'react-router-dom';
 import { GALLERY_ENABLED } from '../lib/gallery';
 import { getAllPosts } from '../lib/posts';
+import { jumpToTop, smoothScrollToTop } from '../lib/scrollToTop';
 import './Navbar.css';
 
 const NAV_ITEMS = [
@@ -82,10 +83,18 @@ const Navbar = () => {
         };
     }, [activePath, updateSlider]);
 
+    const handleNavClick = (path) => () => {
+        if (location.pathname === path) {
+            smoothScrollToTop();
+            return;
+        }
+        jumpToTop();
+    };
+
     return (
         <nav className="navbar glass-panel">
             <div className="navbar-container">
-                <Link to="/" className="navbar-logo">
+                <Link to="/" className="navbar-logo" onClick={handleNavClick('/')}>
                     Devansh<span className="logo-accent">.</span>
                 </Link>
                 <div className="navbar-links" ref={linksRef}>
@@ -102,6 +111,7 @@ const Navbar = () => {
                             key={item.path}
                             to={item.path}
                             className={`nav-link${isActive(item.path) ? ' active' : ''}`}
+                            onClick={handleNavClick(item.path)}
                             ref={(node) => {
                                 if (node) {
                                     linkRefs.current.set(item.path, node);

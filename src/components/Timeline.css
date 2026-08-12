@@ -48,6 +48,7 @@
 }
 
 .timeline-spine {
+    --timeline-progress: 0;
     position: absolute;
     top: 0.35rem;
     bottom: 0.35rem;
@@ -67,19 +68,20 @@
     position: absolute;
     inset: 0 auto auto 0;
     width: 100%;
-    height: calc(var(--timeline-progress, 0) * 100%);
+    height: 100%;
     background: linear-gradient(
         180deg,
         rgba(201, 255, 74, 0.15),
         var(--timeline-accent)
     );
+    transform: scaleY(var(--timeline-progress, 0));
     transform-origin: top;
-    transition: height 80ms linear;
+    will-change: transform;
 }
 
 .timeline-spine-glow {
     position: absolute;
-    top: calc(var(--timeline-progress, 0) * 100% - 10px);
+    top: 0;
     left: 50%;
     width: 11px;
     height: 11px;
@@ -88,9 +90,11 @@
     box-shadow:
         0 0 0 4px rgba(201, 255, 74, 0.12),
         0 0 22px rgba(201, 255, 74, 0.55);
-    transform: translate(-50%, 0) scale(calc(0.55 + var(--timeline-progress, 0) * 0.45));
+    transform:
+        translate(-50%, calc(var(--timeline-progress, 0) * 100% - 6px))
+        scale(calc(0.55 + var(--timeline-progress, 0) * 0.45));
     opacity: calc(0.35 + var(--timeline-progress, 0) * 0.65);
-    transition: top 80ms linear, opacity 160ms ease;
+    will-change: transform;
 }
 
 .timeline-list {
@@ -119,6 +123,22 @@
     opacity: 1;
     transform: translateY(0);
     filter: blur(0);
+}
+
+.timeline-item.is-visible.is-pending {
+    opacity: 0.4;
+    filter: grayscale(0.92) saturate(0.15);
+}
+
+.timeline-item.is-visible.is-reached {
+    opacity: 1;
+    filter: none;
+}
+
+.timeline-item.is-reached .timeline-entry {
+    transform: translate3d(0, calc(var(--item-pop, 0) * -10px), 0)
+        scale(calc(1 + var(--item-pop, 0) * 0.032));
+    transform-origin: left center;
 }
 
 .timeline-node {
@@ -156,11 +176,11 @@
         border-color 280ms ease;
 }
 
-.timeline-item.is-visible .timeline-node-core {
+.timeline-item.is-visible.is-reached .timeline-node-core {
     background: var(--timeline-accent);
 }
 
-.timeline-item.is-hot.is-visible .timeline-node-core {
+.timeline-item.is-hot.is-visible.is-reached .timeline-node-core {
     background: var(--timeline-hot);
 }
 
@@ -195,7 +215,7 @@
 }
 
 .timeline-entry.has-visual {
-    overflow: hidden;
+    overflow: visible;
     isolation: isolate;
 }
 
@@ -209,7 +229,7 @@
     position: absolute;
     z-index: 0;
     inset: 0 0 0 auto;
-    width: min(48%, 320px);
+    width: min(42%, 280px);
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -291,7 +311,11 @@
     pointer-events: none;
 }
 
-.timeline-item.is-visible .timeline-entry-visual {
+.timeline-item.is-visible.is-pending .timeline-entry-visual {
+    opacity: 0.22;
+}
+
+.timeline-item.is-visible.is-reached .timeline-entry-visual {
     opacity: 1;
     transform: translateY(0);
 }
@@ -474,28 +498,81 @@
         padding-left: 1.75rem;
     }
 
-    .timeline-entry-visual {
-        width: min(62%, 240px);
-        opacity: 0.7;
-    }
-
-    .timeline-item.is-visible .timeline-entry-visual {
-        opacity: 0.7;
-    }
-
+    .timeline-entry.has-visual,
     .timeline-entry:has(> [data-visual='camshaft']) {
-        flex-direction: column;
-        align-items: flex-start;
+        display: block;
+        overflow: hidden;
     }
 
+    .timeline-entry:has(> [data-visual='camshaft']) .timeline-entry-copy {
+        flex: none;
+    }
+
+    .timeline-entry-visual,
     .timeline-entry-visual[data-visual='camshaft'] {
-        width: min(176px, 100%);
-        flex-basis: auto;
-        align-self: center;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        width: auto;
+        max-width: none;
+        height: auto;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 0.35rem 0.2rem;
+        overflow: hidden;
+        opacity: 0.16;
+        filter: brightness(0.32) saturate(0.5);
+        mask-image: linear-gradient(
+            180deg,
+            transparent 0%,
+            rgba(0, 0, 0, 0.28) 22%,
+            #000 68%
+        );
+        -webkit-mask-image: linear-gradient(
+            180deg,
+            transparent 0%,
+            rgba(0, 0, 0, 0.28) 22%,
+            #000 68%
+        );
     }
 
-    .timeline-item.is-visible .timeline-entry-visual[data-visual='camshaft'] {
-        opacity: 1;
+    .timeline-entry-visual > *,
+    .timeline-entry-visual[data-visual='camshaft'] > *,
+    .timeline-entry-visual svg,
+    .timeline-entry-visual[data-visual='camshaft'] svg {
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+    }
+
+    .timeline-entry-visual::after {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background: linear-gradient(
+            180deg,
+            rgba(13, 17, 15, 0.92) 0%,
+            rgba(13, 17, 15, 0.62) 38%,
+            rgba(13, 17, 15, 0.28) 100%
+        );
+        content: "";
+        pointer-events: none;
+    }
+
+    .timeline-item.is-visible.is-pending .timeline-entry-visual {
+        opacity: 0.08;
+        filter: brightness(0.28) grayscale(0.8);
+    }
+
+    .timeline-item.is-visible.is-reached .timeline-entry-visual {
+        opacity: 0.26;
+        filter: brightness(0.42) saturate(0.6);
+        transform: translateY(0);
+    }
+
+    .timeline-entry-copy {
+        text-shadow: 0 1px 14px rgba(13, 17, 15, 0.95);
     }
 }
 
