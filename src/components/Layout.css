@@ -8,6 +8,7 @@
     isolation: isolate;
     min-height: calc(100vh - 160px);
     /* rough estimate to keep footer at bottom */
+    overflow-x: clip;
     animation: fadeIn 0.5s ease-out;
 }
 
@@ -16,7 +17,7 @@
     z-index: -1;
     top: -8rem;
     left: 50%;
-    width: min(1200px, 120vw);
+    width: min(1200px, 100%);
     height: 760px;
     content: "";
     transform: translateX(-50%);
