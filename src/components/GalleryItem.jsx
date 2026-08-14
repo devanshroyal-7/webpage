@@ -22,7 +22,13 @@ const GalleryItem = ({ item, index, style }) => {
         return (
             <figure className={className} style={style}>
                 <a href={href} target="_blank" rel="noreferrer">
-                    <img src={item.src} alt={item.alt || title} loading="lazy" />
+                    <img
+                        src={item.src}
+                        alt={item.alt || title}
+                        loading="lazy"
+                        decoding="async"
+                        referrerPolicy="no-referrer"
+                    />
                 </a>
                 <MediaCaption index={label} title={title} meta={item.meta} />
             </figure>

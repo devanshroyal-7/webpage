@@ -2,6 +2,9 @@
 
 Modular media space for photographs, gifs, music, video, embeds, links, and short notes.
 
+Personal binaries are **not** committed to git. Keep the same dated filenames
+(`26_May_2026.jpeg`) and host the files on a public folder or Google Drive.
+
 ## Toggle the Gallery tab
 
 In `src/lib/gallery.js`:
@@ -12,62 +15,73 @@ export const GALLERY_ENABLED = true;  // set false to hide the nav tab + /galler
 
 When disabled, the Gallery link disappears from the navbar (indices renumber) and `/gallery` redirects home.
 
-## Where to edit content
+## Host the files (pick one)
 
-All featured items live in **`src/lib/gallery.js`** → `GALLERY_ITEMS`.
+Copy `.env.example` to `.env` in the project root. Vite only exposes variables that start with `VITE_`.
 
-By default the list auto-discovers files you drop into this folder:
+### A. Public folder URL (recommended)
 
-| Drop these in `src/assets/gallery/` | Card type |
-| --- | --- |
-| `.jpg` `.jpeg` `.png` `.webp` `.avif` `.gif` | `image` / `gif` |
-| `.mp4` `.webm` | `video` |
-| `.mp3` `.ogg` `.wav` `.m4a` | `audio` |
+Use Cloudinary, Cloudflare R2, ImageKit, or any host that serves a direct file URL:
 
-Dated filenames like `26_May_2026.jpeg` sort newest-first and become the caption (`26 May 2026`).
+`https://your-host.example/gallery/26_May_2026.jpeg`
+
+1. Upload the files **with the original names and extensions**.
+2. Set the folder prefix in `.env`:
+
+```bash
+VITE_GALLERY_BASE_URL=https://res.cloudinary.com/YOUR_CLOUD/image/upload/gallery
+```
+
+The page will request `VITE_GALLERY_BASE_URL/<filename>`.
+
+Filenames are listed in `GALLERY_REMOTE_FILES` inside `src/lib/gallery.js`. Add or
+remove a name there after you upload. To skip editing that list, also upload a
+`manifest.json` next to the files:
+
+```json
+[
+  "23_July_2026.JPG",
+  "20_June_2026.jpg",
+  "26_May_2026.jpeg"
+]
+```
+
+Cloudinary: in the upload dialog, enable **Use filename** and turn off **Unique filename**.
+
+### B. Google Drive folder
+
+Drive is convenient, but it is not a CDN. Links can throttle or break. Prefer option A for a public site.
+
+1. Put the files in a Drive folder, keeping the original names.
+2. Share the folder as **Anyone with the link → Viewer**.
+3. In [Google Cloud Console](https://console.cloud.google.com/), enable **Google Drive API**, create an API key, and restrict it to Drive API plus your site’s HTTP referrers (`http://localhost:5173/*` and your production domain).
+4. The folder ID is the tail of the folder URL: `https://drive.google.com/drive/folders/<FOLDER_ID>`.
+
+```bash
+VITE_GALLERY_DRIVE_FOLDER_ID=your_folder_id
+VITE_GALLERY_DRIVE_API_KEY=your_browser_api_key
+```
+
+Restart `npm run dev` after changing `.env`. Adding a photo later is: drop it in the Drive folder with a dated filename. No git commit.
+
+## Local preview only
+
+Files in this folder still work for `npm run dev` when no remote env vars are set.
+They are gitignored. Do not commit them.
 
 ## Hand-curate / mix media types
 
-Replace or extend `GALLERY_ITEMS` with explicit objects. Order in the array is display order.
+Remote photos load first. Extra cards (notes, embeds, links) go in
+`GALLERY_EXTRA_ITEMS` in `src/lib/gallery.js`.
 
 ```js
-import cover from '../assets/gallery/26_May_2026.jpeg';
-import theme from '../assets/gallery/late-night.mp3';
-
-export const GALLERY_ITEMS = [
-  // Keep auto photos, then add custom cards:
-  ...discoverGalleryImages(),
-
-  {
-    type: 'audio',
-    id: 'late-night',
-    src: theme,
-    title: 'Late night loop',
-    artist: 'Devansh',
-  },
-
-  {
-    type: 'gif',
-    id: 'desk-gif',
-    src: '/path-or-import.gif',
-    title: 'Bench setup',
-  },
-
-  {
-    type: 'video',
-    id: 'demo',
-    src: '/path-or-import.mp4',
-    title: 'Lab clip',
-    poster: cover, // optional
-  },
-
+export const GALLERY_EXTRA_ITEMS = [
   {
     type: 'embed',
     id: 'talk',
     embedUrl: 'https://www.youtube.com/embed/VIDEO_ID',
     title: 'Talk recording',
   },
-
   {
     type: 'link',
     id: 'playlist',
@@ -75,7 +89,6 @@ export const GALLERY_ITEMS = [
     title: 'Listening lately',
     description: 'Spotify playlist',
   },
-
   {
     type: 'note',
     id: 'field-note',
@@ -84,8 +97,6 @@ export const GALLERY_ITEMS = [
   },
 ];
 ```
-
-To fully hand-curate (no auto folder scan), delete the `...discoverGallery*()` spreads and list only the objects you want.
 
 ## Item fields
 
