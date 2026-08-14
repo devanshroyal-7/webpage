@@ -3,3 +3,10 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.*
+!.env.example
+
+# Personal gallery binaries — host remotely instead of committing.
+src/assets/gallery/**
+!src/assets/gallery/README.md

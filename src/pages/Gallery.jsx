@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import BashTypewriter from '../components/BashTypewriter';
 import GalleryItem from '../components/GalleryItem';
 import PageHeader from '../components/PageHeader';
-import { GALLERY_ITEMS, GALLERY_META } from '../lib/gallery';
+import { GALLERY_META, loadGalleryItems } from '../lib/gallery';
 import './Gallery.css';
 
 const DEADZONE = 0.16;
@@ -69,20 +69,138 @@ const Gallery = () => {
     const reduceMotion = usePrefersReducedMotion();
     const gridRef = useRef(null);
     const colRefs = useRef([]);
+    const [items, setItems] = useState([]);
+    const [status, setStatus] = useState('loading');
     const [colCount, setColCount] = useState(() =>
         columnCountForWidth(window.innerWidth),
     );
 
+    useEffect(() => {
+        let cancelled = false;
+
+        loadGalleryItems()
+            .then((nextItems) => {
+                if (!cancelled) {
+                    setItems(nextItems);
+                    setStatus('ready');
+                }
+            })
+            .catch(() => {
+                if (!cancelled) {
+                    setItems([]);
+                    setStatus('ready');
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
     const columns = useMemo(
-        () => splitIntoColumns(GALLERY_ITEMS, colCount),
-        [colCount],
+        () => splitIntoColumns(items, colCount),
+        [colCount, items],
     );
+
+    const isReels = colCount === 1 && items.length > 0;
 
     useEffect(() => {
         const onResize = () => setColCount(columnCountForWidth(window.innerWidth));
         window.addEventListener('resize', onResize);
         return () => window.removeEventListener('resize', onResize);
     }, []);
+
+    useEffect(() => {
+        const root = document.documentElement;
+        const nav = document.querySelector('.navbar');
+
+        if (!isReels) {
+            root.classList.remove('gallery-reels');
+            root.style.removeProperty('--reels-nav');
+            return undefined;
+        }
+
+        const syncNavPad = () => {
+            if (!nav) {
+                return;
+            }
+
+            const stickyTop = Number.parseFloat(getComputedStyle(nav).top) || 0;
+            root.style.setProperty(
+                '--reels-nav',
+                `${Math.ceil(nav.getBoundingClientRect().height + stickyTop + 8)}px`,
+            );
+        };
+
+        syncNavPad();
+        root.classList.toggle('gallery-reels', !reduceMotion);
+
+        const observer = new ResizeObserver(syncNavPad);
+        if (nav) {
+            observer.observe(nav);
+        }
+
+        window.addEventListener('resize', syncNavPad);
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('resize', syncNavPad);
+            root.classList.remove('gallery-reels');
+            root.style.removeProperty('--reels-nav');
+        };
+    }, [isReels, reduceMotion]);
+
+    useLayoutEffect(() => {
+        if (!isReels || reduceMotion) {
+            return undefined;
+        }
+
+        const grid = gridRef.current;
+        if (!grid) {
+            return undefined;
+        }
+
+        const slots = [...grid.querySelectorAll('.photo-slot')];
+        const ratios = new Map();
+        let raf = 0;
+
+        const paint = () => {
+            raf = 0;
+            let best = null;
+            let bestRatio = 0;
+
+            ratios.forEach((ratio, slot) => {
+                if (ratio > bestRatio) {
+                    bestRatio = ratio;
+                    best = slot;
+                }
+            });
+
+            slots.forEach((slot) => {
+                slot.classList.toggle('is-active', slot === best);
+            });
+        };
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    ratios.set(entry.target, entry.intersectionRatio);
+                });
+
+                if (!raf) {
+                    raf = window.requestAnimationFrame(paint);
+                }
+            },
+            { threshold: [0, 0.2, 0.4, 0.55, 0.7, 0.85, 1] },
+        );
+
+        slots.forEach((slot) => observer.observe(slot));
+
+        return () => {
+            window.cancelAnimationFrame(raf);
+            observer.disconnect();
+            slots.forEach((slot) => slot.classList.remove('is-active'));
+        };
+    }, [isReels, items, reduceMotion]);
 
     useEffect(() => {
         const grid = gridRef.current;
@@ -98,7 +216,7 @@ const Gallery = () => {
             });
         };
 
-        if (!grid || reduceMotion || !GALLERY_ITEMS.length) {
+        if (!grid || reduceMotion || !items.length || colCount === 1) {
             reset();
             return undefined;
         }
@@ -204,10 +322,10 @@ const Gallery = () => {
             window.removeEventListener('resize', onScroll);
             reset();
         };
-    }, [colCount, reduceMotion]);
+    }, [colCount, items, reduceMotion]);
 
     return (
-        <div className="gallery-page">
+        <div className={isReels ? 'gallery-page gallery-page--reels' : 'gallery-page'}>
             <PageHeader
                 kickerIndex={GALLERY_META.kickerIndex}
                 kickerLabel={GALLERY_META.kickerLabel}
@@ -220,9 +338,14 @@ const Gallery = () => {
                 />
             </PageHeader>
 
-            {GALLERY_ITEMS.length > 0 ? (
+            {status === 'loading' ? (
+                <div className="gallery-empty glass-panel">
+                    <span aria-hidden="true">◌</span>
+                    <p>Loading gallery</p>
+                </div>
+            ) : items.length > 0 ? (
                 <section
-                    className="photo-grid"
+                    className={isReels ? 'photo-grid photo-grid--reels' : 'photo-grid'}
                     aria-label="Gallery"
                     ref={gridRef}
                     style={{ '--gallery-cols': colCount }}
@@ -237,7 +360,11 @@ const Gallery = () => {
                         >
                             {column.map(({ item, index }) => (
                                 <div
-                                    className="photo-slot"
+                                    className={
+                                        isReels && index === 0
+                                            ? 'photo-slot is-active'
+                                            : 'photo-slot'
+                                    }
                                     key={item.id || `${item.type}-${item.title}-${index}`}
                                 >
                                     <GalleryItem
