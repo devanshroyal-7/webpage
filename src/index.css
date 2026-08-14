@@ -7,6 +7,7 @@
   --accent-color: #c9ff4a;
   --accent-hover: #e1ff98;
   --hot-color: #ff7254;
+  --grid-size: 48px;
   
   /* Glassmorphism */
   --glass-bg: rgba(255, 255, 255, 0.025);
@@ -87,7 +88,7 @@ body {
     linear-gradient(rgba(201, 255, 74, 0.018) 1px, transparent 1px),
     linear-gradient(90deg, rgba(201, 255, 74, 0.018) 1px, transparent 1px),
     radial-gradient(circle at 74% 0%, rgba(201, 255, 74, 0.07), transparent 32%);
-  background-size: 48px 48px, 48px 48px, auto;
+    background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size), auto;
   background-attachment: fixed;
 }
 
